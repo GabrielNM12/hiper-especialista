@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vitrine de teste · Mock WooCommerce</title>
+<style>
+  :root { --bg:#faf8f5; --card:#fff; --tx:#22201c; --mut:#6f6a61; --ln:#e8e3db; --ac:#7a3e1d; --ok:#1d6b3c; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#151412; --card:#1f1d1a; --tx:#efebe4; --mut:#a7a197; --ln:#34302a; --ac:#e09a6b; --ok:#6ccf93; } }
+  * { box-sizing:border-box } body { margin:0; font:14px/1.5 system-ui, sans-serif; background:var(--bg); color:var(--tx) }
+  header { padding:18px 20px; border-bottom:1px solid var(--ln); display:flex; align-items:baseline; gap:12px; flex-wrap:wrap }
+  header h1 { margin:0; font-size:19px; letter-spacing:.2px } header span { color:var(--mut); font-size:12px }
+  .wrap { display:grid; grid-template-columns:1fr 360px; gap:20px; padding:20px } @media (max-width:900px) { .wrap { grid-template-columns:1fr } }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px }
+  .card { background:var(--card); border:1px solid var(--ln); border-radius:10px; padding:12px }
+  .prod h3 { margin:6px 0 2px; font-size:14px } .preco { font-weight:700 } .mut { color:var(--mut); font-size:12px }
+  .prod .img { aspect-ratio:1; background:var(--ln); border-radius:8px; display:grid; place-items:center; color:var(--mut); font-size:12px; text-align:center; padding:8px }
+  select, input { width:100%; padding:6px 8px; border:1px solid var(--ln); border-radius:6px; background:var(--bg); color:var(--tx); font:inherit; margin-top:6px }
+  button { margin-top:8px; width:100%; padding:8px; border:0; border-radius:6px; background:var(--ac); color:#fff; font:inherit; font-weight:600; cursor:pointer }
+  button.sec { background:none; border:1px solid var(--ln); color:var(--tx); font-weight:400 }
+  .linha { display:flex; justify-content:space-between; gap:8px; padding:4px 0 } h2 { font-size:15px; margin:0 0 8px }
+  .f2 { display:grid; grid-template-columns:1fr 1fr; gap:6px } .ok { color:var(--ok) } .pedido { border-top:1px solid var(--ln); padding:8px 0; font-size:13px }
+  code { font-size:11px; word-break:break-all }
+</style>
+</head>
+<body>
+<header><h1>Vitrine de teste</h1><span>loja WooCommerce simulada · cupons BEMVINDO10 (10%) e DESC15 (R$ 15)</span></header>
+<div class="wrap">
+  <div>
+    <div class="grid" id="produtos"><p class="mut">Nenhum produto publicado ainda. Rode o conector para trazer o catálogo do Hiper.</p></div>
+  </div>
+  <aside>
+    <div class="card">
+      <h2>Carrinho</h2>
+      <div id="carrinho" class="mut">vazio</div>
+      <input id="cupom" placeholder="Cupom (opcional)">
+      <div class="f2">
+        <input id="nome" placeholder="Nome" value="Ana">
+        <input id="sobrenome" placeholder="Sobrenome" value="Souza">
+      </div>
+      <input id="cpf" placeholder="CPF" value="529.982.247-25">
+      <input id="email" placeholder="E-mail" value="ana.souza@exemplo.com.br">
+      <div class="f2">
+        <input id="cep" placeholder="CEP" value="88802-000">
+        <input id="numero" placeholder="Número" value="120">
+      </div>
+      <input id="rua" placeholder="Rua" value="Rua Coronel Pedro Benedet">
+      <div class="f2">
+        <input id="bairro" placeholder="Bairro" value="Centro">
+        <input id="cidade" placeholder="Cidade" value="Criciúma">
+      </div>
+      <input id="uf" placeholder="UF" value="SC">
+      <select id="pagamento">
+        <option value="pix">Pix</option>
+        <option value="credit_card">Cartão de crédito (3x)</option>
+        <option value="boleto">Boleto</option>
+      </select>
+      <button id="pagar">Finalizar compra (pagamento aprovado)</button>
+      <p class="mut" id="msg"></p>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>Pedidos da loja</h2>
+      <div id="pedidos" class="mut">nenhum</div>
+    </div>
+  </aside>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const brl = v => (+v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let carrinho = [];
+async function produtos(){
+  const ps = await fetch('/loja/api/produtos').then(r=>r.json());
+  if(!ps.length) return;
+  $('#produtos').innerHTML = ps.map(p => {
+    const opts = p.type==='variable'
+      ? `<select data-var="${p.id}">${p.variations.map(v=>`<option value="${v.id}" data-preco="${v.price}" ${v.stock>0?'':'disabled'}>${esc(v.label)} · ${v.stock>0?v.stock+' un':'esgotado'}</option>`).join('')}</select>`
+      : `<p class="mut">${p.stock>0?p.stock+' em estoque':'esgotado'}</p>`;
+    return `<div class="card prod"><div class="img">${esc(p.name)}</div><h3>${esc(p.name)}</h3><div class="preco">${brl(p.price || (p.variations[0]||{}).price)}</div>${opts}<button data-add="${p.id}" data-nome="${esc(p.name)}" data-preco="${p.price}">Adicionar</button></div>`;
+  }).join('');
+  document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
+    const sel = document.querySelector(`[data-var="${b.dataset.add}"]`);
+    const opt = sel ? sel.selectedOptions[0] : null;
+    carrinho.push({product_id:+b.dataset.add, variation_id: opt? +opt.value : 0, quantity:1,
+      nome: b.dataset.nome + (opt ? ' · '+opt.textContent.split(' · ')[0] : ''), preco: opt ? +opt.dataset.preco : +b.dataset.preco});
+    render();
+  });
+}
+function render(){
+  if(!carrinho.length){ $('#carrinho').textContent='vazio'; return; }
+  const total = carrinho.reduce((s,i)=>s+i.preco*i.quantity,0);
+  $('#carrinho').innerHTML = carrinho.map(i=>`<div class="linha"><span>${esc(i.nome)}</span><span>${brl(i.preco)}</span></div>`).join('') + `<div class="linha"><b>Subtotal</b><b>${brl(total)}</b></div><div class="mut">+ frete fixo R$ 19,90</div>`;
+}
+async function pedidos(){
+  const ps = await fetch('/loja/api/pedidos').then(r=>r.json());
+  $('#pedidos').innerHTML = ps.length ? ps.map(p => `<div class="pedido"><b>#${p.number}</b> · ${brl(p.total)} · <span class="${p.status==='completed'?'ok':''}">${p.status}</span>${+p.discount_total?` · desconto ${brl(p.discount_total)}`:''}${p.meta._hiper_codigo_pedido?`<br>Hiper: <code>${esc(p.meta._hiper_codigo_pedido)}</code>`:''}${p.meta._nfe_chave?`<br>NF-e: <code>${esc(p.meta._nfe_chave)}</code>`:''}${p.status==='processing'?` <button class="sec" data-cancel="${p.id}">cancelar pedido</button>`:''}</div>`).join('') : 'nenhum';
+  document.querySelectorAll('[data-cancel]').forEach(b => b.onclick = async () => { await fetch(`/loja/api/pedidos/${b.dataset.cancel}/status?status=cancelled`, {method:'POST'}); pedidos(); });
+}
+$('#pagar').onclick = async () => {
+  if(!carrinho.length){ $('#msg').textContent='Carrinho vazio.'; return; }
+  const corpo = { payment_method: $('#pagamento').value, installments: $('#pagamento').value==='credit_card'?3:1,
+    billing: { first_name:$('#nome').value, last_name:$('#sobrenome').value, email:$('#email').value, cpf:$('#cpf').value,
+      postcode:$('#cep').value, address_1:$('#rua').value, number:$('#numero').value, neighborhood:$('#bairro').value, city:$('#cidade').value, state:$('#uf').value },
+    line_items: carrinho.map(i=>({product_id:i.product_id, variation_id:i.variation_id, quantity:i.quantity})),
+    coupon_lines: $('#cupom').value ? [{code:$('#cupom').value}] : [] };
+  const r = await fetch('/loja/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(corpo)});
+  const j = await r.json();
+  if(!r.ok){ $('#msg').textContent = j.message || 'Erro'; return; }
+  $('#msg').textContent = `Pedido #${j.number} pago: ${brl(j.total)}. O conector vai enviá-lo ao Hiper no próximo ciclo.`;
+  carrinho=[]; render(); pedidos(); produtos();
+};
+produtos(); pedidos(); setInterval(pedidos, 4000);
+</script>
+</body>
+</html>

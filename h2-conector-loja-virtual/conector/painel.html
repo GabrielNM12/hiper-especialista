@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conector Hiper ↔ WooCommerce</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --tx:#1b1f27; --mut:#687083; --ln:#e2e5eb; --ac:#2d5bd7; --ok:#177245; --wr:#a15c00; --er:#b3261e; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111318; --card:#191c23; --tx:#e8ebf1; --mut:#99a1b3; --ln:#2a2f39; --ac:#7d9cff; --ok:#5ccf8f; --wr:#f0a94e; --er:#f27a70; } }
+  * { box-sizing:border-box } body { margin:0; font:14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--tx) }
+  header { padding:16px 20px; background:var(--card); border-bottom:1px solid var(--ln); display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+  header h1 { font-size:17px; margin:0 } header .acoes { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap }
+  button, a.btn { border:1px solid var(--ln); background:var(--bg); color:var(--tx); border-radius:7px; padding:6px 12px; cursor:pointer; font:inherit; font-size:13px; text-decoration:none }
+  button.p { background:var(--ac); border-color:var(--ac); color:#fff }
+  main { padding:16px 20px 40px; display:grid; gap:16px }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px }
+  .kpi { background:var(--card); border:1px solid var(--ln); border-radius:10px; padding:12px 14px } .kpi b { display:block; font-size:22px; margin-top:2px } .kpi span { color:var(--mut); font-size:12px }
+  .card { background:var(--card); border:1px solid var(--ln); border-radius:10px; padding:14px; overflow-x:auto } .card h2 { font-size:14px; margin:0 0 10px }
+  table { border-collapse:collapse; width:100%; min-width:720px } th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--ln); vertical-align:top; font-size:13px } th { color:var(--mut); font-weight:600; font-size:12px }
+  .st { padding:2px 8px; border-radius:99px; font-size:12px; font-weight:600; white-space:nowrap } .st.enviado,.st.faturado { color:var(--ok); background:color-mix(in srgb, var(--ok) 12%, transparent) }
+  .st.erro,.st.cancelar_manual { color:var(--er); background:color-mix(in srgb, var(--er) 12%, transparent) } .st.incerto,.st.enviando,.st.reenviar { color:var(--wr); background:color-mix(in srgb, var(--wr) 14%, transparent) } .st.cancelado { color:var(--mut); background:var(--bg) }
+  .mut { color:var(--mut) } .er { color:var(--er) } .wr { color:var(--wr) } .ok { color:var(--ok) } code { font-size:11px }
+  .div { font-weight:600 } .row2 { display:grid; grid-template-columns:1fr 1fr; gap:16px } @media (max-width:1000px) { .row2 { grid-template-columns:1fr } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Conector Hiper ↔ WooCommerce</h1><span class="mut" id="ciclo">…</span>
+  <div class="acoes">
+    <button class="p" id="sync">Sincronizar agora</button>
+    <button id="resync">Ressincronizar catálogo</button>
+    <a class="btn" href="/conciliacao.csv">Conciliação (CSV)</a>
+  </div>
+</header>
+<main>
+  <div class="kpis" id="kpis"></div>
+  <div class="card">
+    <h2>Pedidos da loja virtual</h2>
+    <table><thead><tr><th>Pedido</th><th>Situação</th><th>Hiper</th><th>Loja × Hiper</th><th>Desconto rateado</th><th>Pagamento</th><th>Detalhe</th><th></th></tr></thead><tbody id="pedidos"></tbody></table>
+  </div>
+  <div class="row2">
+    <div class="card"><h2>Pendências de catálogo</h2><table style="min-width:0"><thead><tr><th>Produto</th><th>Tentativas</th><th>Erro</th></tr></thead><tbody id="pend"></tbody></table></div>
+    <div class="card"><h2>Auditoria</h2><table style="min-width:0"><thead><tr><th>Quando</th><th>Evento</th><th>Detalhe</th></tr></thead><tbody id="aud"></tbody></table></div>
+  </div>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const brl = v => (+v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const j = (u,o) => fetch(u,o).then(r=>r.json());
+async function carregar(){
+  const s = await j('/api/status');
+  const c = s.ultimo_ciclo;
+  $('#ciclo').textContent = c ? `último ciclo ${c.inicio.replace('T',' ')} · ${c.duracao_s}s · a cada ${s.intervalo_segundos}s` : 'nenhum ciclo ainda';
+  const ps = s.pedidos_por_status, v = s.produtos_vinculados;
+  const kpi = (t,n,cls='') => `<div class="kpi"><span>${t}</span><b class="${cls}">${n}</b></div>`;
+  $('#kpis').innerHTML = kpi('Produtos vinculados', (v.simples||0)+(v.variavel||0)) + kpi('Variações', v.variacao||0)
+    + kpi('Pedidos enviados', (ps.enviado||0)+(ps.faturado||0), 'ok') + kpi('Faturados (NF-e)', ps.faturado||0, 'ok')
+    + kpi('Precisam de atenção', (ps.erro||0)+(ps.incerto||0)+(ps.cancelar_manual||0)+s.pendencias, ((ps.erro||0)+(ps.incerto||0)+s.pendencias)?'er':'')
+    + kpi('Ponto de sincronização', `${s.ponto_produtos} / ${s.ponto_estoque}`);
+  const pedidos = await j('/api/pedidos');
+  $('#pedidos').innerHTML = pedidos.length ? pedidos.map(p => {
+    const c = p.conciliacao || {};
+    const div = Math.abs(c.divergencia||0) > 0.009 ? `<div class="wr div">diferença ${brl(c.divergencia)}</div>` : (c.total_loja!==undefined ? '<div class="ok">confere</div>' : '');
+    const acoes = ['erro','incerto','cancelar_manual'].includes(p.status) ? `<button data-re="${p.woo_id}">Reenviar</button>${p.status==='incerto'?` <button data-vin="${p.woo_id}">Já existe no Hiper</button>`:''}` : '';
+    return `<tr><td><b>#${esc(p.numero)}</b><div class="mut">woo ${p.woo_id}</div></td><td><span class="st ${p.status}">${p.status}</span></td>
+      <td>${p.hiper_codigo?`<code>${esc(p.hiper_codigo)}</code>`:'<span class="mut">—</span>'}${p.chave_nfe?`<div class="mut"><code>NF-e ${esc(p.chave_nfe.slice(0,14))}…</code></div>`:''}</td>
+      <td>${c.total_loja!==undefined?`${brl(c.total_loja)} × ${brl(c.total_hiper)}`:'—'}${div}</td>
+      <td>${c.desconto_nos_itens?brl(c.desconto_nos_itens):'—'}${c.cupons&&c.cupons.length?`<div class="mut">${esc(c.cupons.join(', '))}</div>`:''}${c.linhas_divididas?`<div class="mut">${c.linhas_divididas} linha(s) dividida(s) p/ centavos</div>`:''}</td>
+      <td>${esc(c.meio_hiper||'—')}${c.parcelas>1?` ${c.parcelas}x`:''}</td><td class="er">${esc(p.erro||'')}</td><td>${acoes}</td></tr>`;
+  }).join('') : '<tr><td colspan="8" class="mut">Nenhum pedido ainda. Faça uma compra na vitrine.</td></tr>';
+  document.querySelectorAll('[data-re]').forEach(b => b.onclick = async () => { await j(`/api/pedidos/${b.dataset.re}/reenviar`,{method:'POST'}); carregar(); });
+  document.querySelectorAll('[data-vin]').forEach(b => b.onclick = async () => { const id = prompt('ID do pedido de venda no Hiper:'); if(id){ await j(`/api/pedidos/${b.dataset.vin}/vincular?hiper_id=${encodeURIComponent(id)}`,{method:'POST'}); carregar(); } });
+  const pend = await j('/api/pendencias');
+  $('#pend').innerHTML = pend.length ? pend.map(p => `<tr><td>${esc(p.nome)}</td><td>${p.tentativas}</td><td class="er">${esc(p.erro)}</td></tr>`).join('') : '<tr><td colspan="3" class="mut">Nenhuma pendência.</td></tr>';
+  const aud = await j('/api/auditoria?limite=40');
+  const cor = {erro:'er', aviso:'wr', info:''};
+  $('#aud').innerHTML = aud.map(a => `<tr><td class="mut">${a.data.slice(11)}</td><td class="${cor[a.nivel]}">${esc(a.entidade)} · ${esc(a.acao)}${a.referencia?` <span class="mut">${esc(a.referencia)}</span>`:''}</td><td class="mut">${esc((a.detalhe||'').slice(0,140))}</td></tr>`).join('');
+}
+$('#sync').onclick = async () => { $('#sync').disabled = true; await j('/api/sincronizar',{method:'POST'}); $('#sync').disabled = false; carregar(); };
+$('#resync').onclick = async () => { if(confirm('Reenviar todo o catálogo do Hiper para a loja?')){ await j('/api/ressincronizar-catalogo',{method:'POST'}); carregar(); } };
+carregar(); setInterval(carregar, 4000);
+</script>
+</body>
+</html>

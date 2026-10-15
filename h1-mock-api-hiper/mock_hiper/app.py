@@ -270,7 +270,7 @@ def criar_app(config: Optional[Config] = None, *, despachar_webhooks: bool = Tru
         return [
             {**{k: v for k, v in p.items() if k not in ("imagensAdicionais",)},
              "disponivel": p["estoque"] - p["reservado"]}
-            for p in sorted(estado.produtos.values(), key=lambda p: (p["codigo"], p["paiId"] is not None, p["nome"]))
+            for p in sorted(estado.produtos.values(), key=lambda p: (p["codigo"], p["paiId"] is not None))
         ]
 
 
