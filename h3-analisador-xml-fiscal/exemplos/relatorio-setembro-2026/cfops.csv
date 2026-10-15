@@ -1,0 +1,9 @@
+﻿operacao;cfop;itens;valor;descricao
+Saída;5102;775;117233,86;Venda de mercadoria adquirida de terceiros
+Saída;5405;123;7091,5599999999995;Venda com ST já retida (substituído)
+Saída;6108;18;2278,2000000000003;Venda de mercadoria a não contribuinte (interestadual)
+Saída;6102;1;59,9;Venda de mercadoria de terceiros (interestadual)
+Entrada;5102;12;14604,0;CFOP do fornecedor: Venda de mercadoria adquirida de terceiros
+Entrada;6101;8;12351,0;CFOP do fornecedor: Venda de produção (interestadual)
+Entrada;6102;4;3774,0;CFOP do fornecedor: Venda de mercadoria de terceiros (interestadual)
+Entrada;5401;4;1579,2;CFOP do fornecedor: Venda de produção com ST (substituto)

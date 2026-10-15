@@ -12,3 +12,4 @@ build/
 .streamlit/secrets.toml
 node_modules/
 saida/
+h3-analisador-xml-fiscal/exemplos/xml/
