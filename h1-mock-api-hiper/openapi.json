@@ -1,0 +1,1393 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Mock API Hiper (e-commerce)",
+    "description": "\nMock da **API personalizada (e-commerce) do Hiper Gestão**, fiel ao contrato publicado no Swagger oficial.\n\n1. Gere o token em `GET /api/v1/auth/gerar-token/{chaveDeSeguranca}` com a chave de exemplo do README.\n2. Use `Authorization: Bearer <token>` nas demais rotas.\n3. Use `/gestao` (ou as rotas `/simulador`) para agir como o lojista: mudar preço, estoque, faturar pedido.\n\nCódigos de evento, de situação e de webhook não são publicados pela Hiper; aqui são **simulados**.\n",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/auth/gerar-token/{chaveDeSeguranca}": {
+      "get": {
+        "tags": [
+          "Autenticacao"
+        ],
+        "summary": "Gerar Token",
+        "operationId": "gerar_token_api_v1_auth_gerar_token__chaveDeSeguranca__get",
+        "parameters": [
+          {
+            "name": "chaveDeSeguranca",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Chavedeseguranca"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/produtos/pontoDeSincronizacao": {
+      "get": {
+        "tags": [
+          "Produtos"
+        ],
+        "summary": "Produtos Ponto",
+        "operationId": "produtos_ponto_api_v1_produtos_pontoDeSincronizacao_get",
+        "parameters": [
+          {
+            "name": "pontoDeSincronizacao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Pontodesincronizacao"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/produtos/listagemDeProdutos": {
+      "get": {
+        "tags": [
+          "Produtos"
+        ],
+        "summary": "Produtos Listagem",
+        "operationId": "produtos_listagem_api_v1_produtos_listagemDeProdutos_get",
+        "parameters": [
+          {
+            "name": "pontoDeSincronizacao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Pontodesincronizacao"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/categorias/categorias-de-produto": {
+      "get": {
+        "tags": [
+          "Categorias"
+        ],
+        "summary": "Categorias",
+        "operationId": "categorias_api_v1_categorias_categorias_de_produto_get",
+        "parameters": [
+          {
+            "name": "categoriaProdutoId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Categoriaprodutoid"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/estoques/pontoDeSincronizacao": {
+      "get": {
+        "tags": [
+          "Estoque"
+        ],
+        "summary": "Estoque Produto",
+        "operationId": "estoque_produto_api_v1_estoques_pontoDeSincronizacao_get",
+        "parameters": [
+          {
+            "name": "produtoId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Produtoid"
+            }
+          },
+          {
+            "name": "pontoDeSincronizacao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Pontodesincronizacao"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/estoques/estoquesDeProdutos": {
+      "get": {
+        "tags": [
+          "Estoque"
+        ],
+        "summary": "Estoques",
+        "operationId": "estoques_api_v1_estoques_estoquesDeProdutos_get",
+        "parameters": [
+          {
+            "name": "pontoDeSincronizacao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Pontodesincronizacao"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Pagina"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pedido-de-venda": {
+      "post": {
+        "tags": [
+          "PedidoDeVenda"
+        ],
+        "summary": "Criar Pedido",
+        "operationId": "criar_pedido_api_v1_pedido_de_venda_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pedido-de-venda/eventos/{id}": {
+      "get": {
+        "tags": [
+          "PedidoDeVenda"
+        ],
+        "summary": "Eventos",
+        "operationId": "eventos_api_v1_pedido_de_venda_eventos__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pedido-de-venda/cancelar/{id}": {
+      "put": {
+        "tags": [
+          "PedidoDeVenda"
+        ],
+        "summary": "Cancelar",
+        "operationId": "cancelar_api_v1_pedido_de_venda_cancelar__id__put",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pedido-de-venda/atualizar-status": {
+      "post": {
+        "tags": [
+          "PedidoDeVenda"
+        ],
+        "summary": "Atualizar Status",
+        "operationId": "atualizar_status_api_v1_pedido_de_venda_atualizar_status_post",
+        "parameters": [
+          {
+            "name": "pedidodeVendaId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pedidodevendaid"
+            }
+          },
+          {
+            "name": "codigoSituacao",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Codigosituacao"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/configuracao/webhook-tipos": {
+      "get": {
+        "tags": [
+          "Configuracao"
+        ],
+        "summary": "Webhook Tipos",
+        "operationId": "webhook_tipos_api_v1_configuracao_webhook_tipos_get",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/configuracao/webhook-config": {
+      "post": {
+        "tags": [
+          "Configuracao"
+        ],
+        "summary": "Salvar Webhook",
+        "operationId": "salvar_webhook_api_v1_configuracao_webhook_config_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/configuracao/webhook-config/{contaHiperId}": {
+      "get": {
+        "tags": [
+          "Configuracao"
+        ],
+        "summary": "Obter Webhook",
+        "operationId": "obter_webhook_api_v1_configuracao_webhook_config__contaHiperId__get",
+        "parameters": [
+          {
+            "name": "contaHiperId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Contahiperid"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/arquivos/xml/{chave}.xml": {
+      "get": {
+        "tags": [
+          "Arquivos"
+        ],
+        "summary": "Xml",
+        "operationId": "xml_arquivos_xml__chave__xml_get",
+        "parameters": [
+          {
+            "name": "chave",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Chave"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/produtos": {
+      "get": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Produtos",
+        "operationId": "sim_produtos_simulador_produtos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/produtos/{produto_id}": {
+      "patch": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Alterar",
+        "operationId": "sim_alterar_simulador_produtos__produto_id__patch",
+        "parameters": [
+          {
+            "name": "produto_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Produto Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlterarProduto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/produtos/{produto_id}/estoque": {
+      "post": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Estoque",
+        "operationId": "sim_estoque_simulador_produtos__produto_id__estoque_post",
+        "parameters": [
+          {
+            "name": "produto_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Produto Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AjusteEstoque"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/produtos/{produto_id}/loja-virtual": {
+      "post": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Loja Virtual",
+        "operationId": "sim_loja_virtual_simulador_produtos__produto_id__loja_virtual_post",
+        "parameters": [
+          {
+            "name": "produto_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Produto Id"
+            }
+          },
+          {
+            "name": "enviar",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Enviar"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/pedidos": {
+      "get": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Pedidos",
+        "operationId": "sim_pedidos_simulador_pedidos_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/pedidos/{pedido_id}/faturar": {
+      "post": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Faturar",
+        "operationId": "sim_faturar_simulador_pedidos__pedido_id__faturar_post",
+        "parameters": [
+          {
+            "name": "pedido_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pedido Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/pedidos/{pedido_id}/cancelar-no-gestao": {
+      "post": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Cancelar Gestao",
+        "description": "Cancela pelo Gestão. A API continua mostrando o pedido como ativo (comportamento real, ver FAQ).",
+        "operationId": "sim_cancelar_gestao_simulador_pedidos__pedido_id__cancelar_no_gestao_post",
+        "parameters": [
+          {
+            "name": "pedido_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Pedido Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/caos": {
+      "put": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Caos",
+        "operationId": "sim_caos_simulador_caos_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Caos"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/resetar": {
+      "post": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Resetar",
+        "operationId": "sim_resetar_simulador_resetar_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/info": {
+      "get": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Info",
+        "operationId": "sim_info_simulador_info_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulador/log": {
+      "get": {
+        "tags": [
+          "Simulador (Hiper Gestão)"
+        ],
+        "summary": "Sim Log",
+        "operationId": "sim_log_simulador_log_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AjusteEstoque": {
+        "properties": {
+          "quantidade": {
+            "type": "number",
+            "title": "Quantidade"
+          },
+          "modo": {
+            "type": "string",
+            "title": "Modo",
+            "default": "definir"
+          }
+        },
+        "type": "object",
+        "required": [
+          "quantidade"
+        ],
+        "title": "AjusteEstoque"
+      },
+      "AlterarProduto": {
+        "properties": {
+          "preco": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preco"
+          },
+          "nome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nome"
+          },
+          "descricao": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Descricao"
+          },
+          "ativo": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ativo"
+          },
+          "estoqueMinimo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estoqueminimo"
+          },
+          "variacaoAtiva": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variacaoativa"
+          }
+        },
+        "type": "object",
+        "title": "AlterarProduto"
+      },
+      "Caos": {
+        "properties": {
+          "latencia_ms": {
+            "type": "integer",
+            "title": "Latencia Ms",
+            "default": 0
+          },
+          "taxa_429": {
+            "type": "number",
+            "title": "Taxa 429",
+            "default": 0.0
+          },
+          "taxa_500": {
+            "type": "number",
+            "title": "Taxa 500",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "Caos"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WebhookEntrada": {
+        "properties": {
+          "ativo": {
+            "type": "boolean",
+            "title": "Ativo",
+            "default": true
+          },
+          "contaHiperId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contahiperid"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "tipo": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tipo"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "limiteDeTentativas": {
+            "type": "integer",
+            "title": "Limitedetentativas",
+            "default": 3
+          },
+          "intervaloEmSegundosEntreTentativas": {
+            "type": "integer",
+            "title": "Intervaloemsegundosentretentativas",
+            "default": 5
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "WebhookEntrada"
+      }
+    }
+  }
+}

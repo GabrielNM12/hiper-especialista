@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+.env
+*.db
+*.sqlite3
+dist/
+build/
+.streamlit/secrets.toml
+node_modules/
+saida/

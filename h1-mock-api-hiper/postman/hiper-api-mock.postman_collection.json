@@ -1,0 +1,616 @@
+{
+  "info": {
+    "name": "Hiper API personalizada (mock)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Fluxo completo da API de e-commerce do Hiper. Rode na ordem. Variáveis são preenchidas pelos scripts de teste."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000"
+    },
+    {
+      "key": "chaveDeSeguranca",
+      "value": "4d6f636b48697065724c6f6a614d6f646153756c4372696369756d6132303236"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "pontoDeSincronizacao",
+      "value": "0"
+    },
+    {
+      "key": "produtoId",
+      "value": ""
+    },
+    {
+      "key": "preco",
+      "value": "0"
+    },
+    {
+      "key": "totalPedido",
+      "value": "0"
+    },
+    {
+      "key": "pedidoId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticação",
+      "item": [
+        {
+          "name": "Gerar token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/gerar-token/{{chaveDeSeguranca}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "gerar-token",
+                "{{chaveDeSeguranca}}"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('token', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Produtos",
+      "item": [
+        {
+          "name": "Produtos alterados desde o ponto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/produtos/pontoDeSincronizacao?pontoDeSincronizacao={{pontoDeSincronizacao}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "produtos",
+                "pontoDeSincronizacao"
+              ],
+              "query": [
+                {
+                  "key": "pontoDeSincronizacao",
+                  "value": "{{pontoDeSincronizacao}}"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "pm.test('tem produtos', () => pm.expect(j.produtos.length).to.be.above(0));",
+                  "const filho = j.produtos.find(p => p.produtoPrimarioId !== '00000000-0000-0000-0000-000000000000' && p.quantidadeEmEstoque > 0);",
+                  "if (filho) { pm.collectionVariables.set('produtoId', filho.id); pm.collectionVariables.set('preco', filho.preco); pm.collectionVariables.set('totalPedido', (filho.preco + 10).toFixed(2)); }",
+                  "console.log('ponto atual', j.pontoDeSincronizacao);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listagem paginada (com atacado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/produtos/listagemDeProdutos?pontoDeSincronizacao=0&pagina=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "produtos",
+                "listagemDeProdutos"
+              ],
+              "query": [
+                {
+                  "key": "pontoDeSincronizacao",
+                  "value": "0"
+                },
+                {
+                  "key": "pagina",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Categorias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/categorias/categorias-de-produto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categorias",
+                "categorias-de-produto"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Estoque",
+      "item": [
+        {
+          "name": "Estoque de um produto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/estoques/pontoDeSincronizacao?produtoId={{produtoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "estoques",
+                "pontoDeSincronizacao"
+              ],
+              "query": [
+                {
+                  "key": "produtoId",
+                  "value": "{{produtoId}}"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Estoques alterados (paginado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/estoques/estoquesDeProdutos?pontoDeSincronizacao=0&pagina=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "estoques",
+                "estoquesDeProdutos"
+              ],
+              "query": [
+                {
+                  "key": "pontoDeSincronizacao",
+                  "value": "0"
+                },
+                {
+                  "key": "pagina",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Pedido de venda",
+      "item": [
+        {
+          "name": "Criar pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pedido-de-venda",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedido-de-venda"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cliente\": {\n    \"documento\": \"19561920000\",\n    \"email\": \"cliente@exemplo.com.br\",\n    \"inscricaoEstadual\": \"\",\n    \"nomeDoCliente\": \"Cliente do E-commerce\",\n    \"nomeFantasia\": \"\"\n  },\n  \"enderecoDeCobranca\": {\n    \"bairro\": \"Centro\",\n    \"cep\": \"88801010\",\n    \"codigoIbge\": 4204608,\n    \"complemento\": \"\",\n    \"logradouro\": \"Rua Principal\",\n    \"numero\": \"01\"\n  },\n  \"enderecoDeEntrega\": {\n    \"bairro\": \"Centro\",\n    \"cep\": \"88801010\",\n    \"codigoIbge\": 4204608,\n    \"complemento\": \"Sala 2\",\n    \"logradouro\": \"Rua Principal\",\n    \"numero\": \"22\"\n  },\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 1,\n      \"precoUnitarioBruto\": {{preco}},\n      \"precoUnitarioLiquido\": {{preco}}\n    }\n  ],\n  \"meiosDePagamento\": [\n    {\n      \"idMeioDePagamento\": 12,\n      \"parcelas\": 1,\n      \"valor\": {{totalPedido}}\n    }\n  ],\n  \"numeroPedidoDeVenda\": \"POSTMAN-1\",\n  \"observacaoDoPedidoDeVenda\": \"\",\n  \"valorDoFrete\": 10,\n  \"Marketplace\": {\n    \"Cnpj\": \"12605982000124\",\n    \"Nome\": \"Loja Virtual\"\n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('pedidoId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar eventos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pedido-de-venda/eventos/{{pedidoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedido-de-venda",
+                "eventos",
+                "{{pedidoId}}"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "[Simulador] Faturar pedido no Gestão (emite NF-e)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/pedidos/{{pedidoId}}/faturar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "pedidos",
+                "{{pedidoId}}",
+                "faturar"
+              ]
+            },
+            "description": "O Hiper processa o pedido de forma assíncrona; espere alguns segundos antes de faturar.",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// pedido é processado de forma assíncrona (situação 1 → 2)",
+                  "setTimeout(() => {}, 1500);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar eventos (com chave da NF-e)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pedido-de-venda/eventos/{{pedidoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedido-de-venda",
+                "eventos",
+                "{{pedidoId}}"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const ev = pm.response.json().eventos;",
+                  "pm.test('tem documento fiscal', () => pm.expect(ev.some(e => e.chaveDocumentoFiscal)).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar pedido",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pedido-de-venda/cancelar/{{pedidoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "pedido-de-venda",
+                "cancelar",
+                "{{pedidoId}}"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Webhook",
+      "item": [
+        {
+          "name": "Configurar webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/configuracao/webhook-config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "configuracao",
+                "webhook-config"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ativo\": true,\n  \"url\": \"https://webhook.site/seu-id\",\n  \"tipo\": [\n    1,\n    2,\n    3\n  ],\n  \"limiteDeTentativas\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "Tipos de webhook",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/configuracao/webhook-tipos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "configuracao",
+                "webhook-tipos"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Simulador (só no mock)",
+      "item": [
+        {
+          "name": "Ligar falhas (429 em 30%)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/caos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "caos"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"taxa_429\": 0.3\n}"
+            }
+          }
+        },
+        {
+          "name": "Resetar mock",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/simulador/resetar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "simulador",
+                "resetar"
+              ]
+            },
+            "description": "",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

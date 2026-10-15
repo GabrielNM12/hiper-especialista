@@ -1,0 +1,53 @@
+{
+  "_fonte": "https://ms-ecommerce.hiper.com.br/swagger/v1/swagger.json",
+  "_coletado_em": "2026-10-15",
+  "_observacao": "Lista de campos por DTO do Swagger oficial. Use scripts/comparar_com_swagger_oficial.py para checar se o contrato mudou.",
+  "rotas": [
+    "GET /api/v1/auth/gerar-token/{chaveDeSeguranca}",
+    "GET /api/v1/categorias/categorias-de-produto",
+    "GET /api/v1/configuracao/webhook-tipos",
+    "GET /api/v1/configuracao/webhook-config/{contaHiperId}",
+    "POST /api/v1/configuracao/webhook-config",
+    "GET /api/v1/estoques/pontoDeSincronizacao",
+    "GET /api/v1/estoques/estoquesDeProdutos",
+    "POST /api/v1/pedido-de-venda/atualizar-status",
+    "PUT /api/v1/pedido-de-venda/cancelar/{id}",
+    "GET /api/v1/pedido-de-venda/eventos/{id}",
+    "POST /api/v1/pedido-de-venda",
+    "GET /api/v1/produtos/listagemDeProdutos",
+    "GET /api/v1/produtos/pontoDeSincronizacao"
+  ],
+  "rotas_fora_do_escopo_do_mock": [
+    "GET /api/v1/chaveDeSeguranca",
+    "GET /api/v1/configuracao/listar-clientes/{dataDeCadastro}",
+    "GET /api/v1/configuracao/parceiro-webhook-tipos",
+    "GET /api/v1/historicoDeConsultaDeChaveDeSeguranca"
+  ],
+  "dtos": {
+    "TokenDto": ["chaveDeSeguranca", "token", "errors", "message"],
+    "ListaDeProdutosDto": ["pontoDeSincronizacao", "produtos", "errors", "message"],
+    "ProdutoDto": ["altura", "ativo", "categoria", "categoriaDoProdutoId", "codigo", "codigoDeBarras", "comprimento", "cor", "descricao", "grade", "id", "imagem", "imagensAdicionais", "largura", "marca", "ncm", "nome", "peso", "preco", "produtoPrimarioId", "quantidadeEmEstoque", "quantidadeMinimaEmEstoque", "removido", "tamanho", "unidade", "variacao", "variacaoAtiva", "atacadoAtivo", "precoAtacado"],
+    "ProdutoPontoDeSincronizacaoDto": ["quantidadeEmEstoqueReservado", "removido", "altura", "ativo", "categoria", "categoriaDoProdutoId", "codigo", "codigoDeBarras", "comprimento", "cor", "descricao", "grade", "id", "imagem", "imagensAdicionais", "largura", "marca", "ncm", "nome", "peso", "preco", "produtoPrimarioId", "quantidadeEmEstoque", "quantidadeMinimaEmEstoque", "tamanho", "unidade", "variacao", "variacaoAtiva", "atacadoAtivo", "precoAtacado"],
+    "VariacaoDoProdutoPontoDeSincronizacaoDto": ["variacaoAtiva", "codigo", "codigoDeBarras", "id", "nomeVariacaoA", "nomeVariacaoB", "quantidadeEmEstoque", "quantidadeEmEstoqueReservado", "quantidadeMinimaEmEstoque", "tipoVariacaoA", "tipoVariacaoB"],
+    "ImagemDoProdutoDto": ["imagem"],
+    "PrecoAtacadoEcommerceDto": ["precos"],
+    "ItemPrecoAtacadoEcommerceDto": ["precoUnitario", "quantidade"],
+    "EstoqueDoProdutoDto": ["pontoDeSincronizacao", "produtoId", "quantidadeEmEstoque", "quantidadeEmEstoqueReservado", "quantidadeMinimaEmEstoque", "errors", "message"],
+    "ListaDeEstoquesDosProdutosDto": ["contaHiperId", "localDeEstoqueId", "pontoDeSituacao", "pagina", "estoquesDeProdutos", "errors", "message"],
+    "EstoqueDoProdutoPontoDeSincronizacaoDto": ["quantidadeEmEstoqueReservado", "pontoDeSincronizacao", "produtoId", "quantidadeEmEstoque", "quantidadeMinimaEmEstoque", "errors", "message"],
+    "PedidoDeVendaDto": ["cliente", "enderecoDeCobranca", "enderecoDeEntrega", "itens", "marketplace", "meiosDePagamento", "numeroPedidoDeVenda", "observacao", "rastreio", "transportadora", "valorDoFrete", "errors", "message"],
+    "ClienteDto": ["documento", "email", "inscricaoEstadual", "nomeDoCliente", "nomeFantasia"],
+    "EnderecoDto": ["bairro", "cep", "codigoIbge", "complemento", "logradouro", "numero"],
+    "ItemDoPedidoDeVendaDto": ["produtoId", "quantidade", "precoUnitarioBruto", "precoUnitarioLiquido"],
+    "MeioDePagamentoDto": ["idMeioDePagamento", "parcelas", "valor"],
+    "MarketplaceDto": ["cnpj", "nome"],
+    "TransportadoraDto": ["documento", "nome"],
+    "RecebimentoDoPedidoDeVendaDto": ["id", "errors", "message"],
+    "EventosDoPedidoDeVendaDto": ["cancelado", "codigoDaSituacaoDeProcessamento", "codigoDoPedidoDeVenda", "data", "eventos", "pedidoDeVendaId", "errors", "message"],
+    "EventoDto": ["chaveDocumentoFiscal", "codigoDoTipoDeEvento", "data", "observacao", "tipoDocumentoFiscal", "urlArquivoXml"],
+    "RecebimentoDeCancelamentoDePedidoDto": ["errors", "message"],
+    "AtualizacaoStatusDto": ["errors", "message"],
+    "ConfiguracaoDeWebhookContract": ["ativo", "contaHiperId", "id", "tipo", "url", "limiteDeTentativas"],
+    "ConfiguracaoDeWebhookResponseContract": ["ativo", "contaHiperId", "id", "intervaloEmSegundosEntreTentativas", "limiteDeTentativas", "tipo", "url", "errors", "errosConsolidados", "failures", "successMessage"]
+  }
+}

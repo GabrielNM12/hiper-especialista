@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retaguarda simulada · Mock API Hiper</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --tx:#1d2330; --mut:#677085; --ln:#e3e6ec; --ac:#0f6b5c; --ac2:#e8f3f1; --wr:#a35a00; --er:#b42318; --ok:#147a3d; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#12151b; --card:#1a1f27; --tx:#e7eaf0; --mut:#98a1b3; --ln:#2a313c; --ac:#4fb7a3; --ac2:#173530; --wr:#f0a54a; --er:#f2766b; --ok:#5fcf8c; } }
+  * { box-sizing:border-box } body { margin:0; font:14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--tx); }
+  header { padding:16px 20px; border-bottom:1px solid var(--ln); background:var(--card); display:flex; gap:16px; align-items:center; flex-wrap:wrap }
+  header h1 { font-size:17px; margin:0 } .tag { font-size:12px; color:var(--mut) } .badge { background:var(--ac2); color:var(--ac); padding:2px 8px; border-radius:99px; font-size:12px; font-weight:600 }
+  nav { display:flex; gap:4px; padding:10px 20px 0; flex-wrap:wrap } nav button { border:0; background:none; padding:8px 12px; border-radius:8px 8px 0 0; color:var(--mut); cursor:pointer; font:inherit }
+  nav button.on { background:var(--card); color:var(--tx); font-weight:600; border:1px solid var(--ln); border-bottom-color:var(--card) }
+  main { padding:0 20px 40px } section { display:none; background:var(--card); border:1px solid var(--ln); border-radius:0 10px 10px 10px; padding:16px; overflow-x:auto } section.on { display:block }
+  table { border-collapse:collapse; width:100%; min-width:760px } th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--ln); vertical-align:middle } th { font-size:12px; color:var(--mut); font-weight:600 }
+  tr.filho td:first-child { padding-left:28px; color:var(--mut) } tr.pai { background:color-mix(in srgb, var(--ac2) 50%, transparent) }
+  input[type=number] { width:86px; padding:4px 6px; border:1px solid var(--ln); border-radius:6px; background:var(--bg); color:var(--tx); font:inherit }
+  button.b { border:1px solid var(--ln); background:var(--bg); color:var(--tx); border-radius:6px; padding:4px 10px; cursor:pointer; font:inherit; font-size:13px } button.b:hover { border-color:var(--ac) }
+  button.p { background:var(--ac); border-color:var(--ac); color:#fff } .neg { color:var(--er); font-weight:600 } .ok { color:var(--ok) } .wr { color:var(--wr) } .mut { color:var(--mut) }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px } label { display:block; font-size:12px; color:var(--mut); margin-bottom:4px }
+  code { font-size:12px; background:var(--bg); padding:1px 5px; border-radius:4px } .aviso { font-size:12px; color:var(--mut); margin:0 0 12px }
+  #toast { position:fixed; bottom:16px; right:16px; background:var(--tx); color:var(--bg); padding:10px 14px; border-radius:8px; opacity:0; transition:.2s; max-width:360px } #toast.on { opacity:1 }
+</style>
+</head>
+<body>
+<header>
+  <h1>Retaguarda simulada</h1><span class="badge">Mock API Hiper</span>
+  <span class="tag" id="info">carregando…</span>
+  <span class="tag" style="margin-left:auto"><a href="/docs">Swagger do mock</a></span>
+</header>
+<nav>
+  <button data-t="produtos" class="on">Produtos e estoque</button>
+  <button data-t="pedidos">Pedidos de venda</button>
+  <button data-t="log">Requisições da integração</button>
+  <button data-t="caos">Simular falhas</button>
+</nav>
+<main>
+<section id="produtos" class="on">
+  <p class="aviso">Ações aqui fazem o papel do lojista no Hiper Gestão. Cada mudança gera um novo ponto de sincronização, que a integração enxerga na próxima consulta.</p>
+  <table><thead><tr><th>Produto</th><th>Código / barras</th><th>Preço</th><th>Estoque</th><th>Reservado</th><th>Loja virtual</th><th>Ponto</th></tr></thead><tbody id="tb-prod"></tbody></table>
+</section>
+<section id="pedidos">
+  <p class="aviso">Pedidos recebidos pela API. "Faturar" emite a NF-e (homologação, simulada) e gera o evento com a chave. "Cancelar no Gestão" mostra a pegadinha do FAQ: a API continua vendo o pedido como ativo.</p>
+  <table><thead><tr><th>Código</th><th>Loja virtual</th><th>Cliente</th><th>Total</th><th>Situação</th><th>Documento fiscal</th><th>Ações</th></tr></thead><tbody id="tb-ped"></tbody></table>
+</section>
+<section id="log">
+  <p class="aviso">Últimas chamadas feitas por integrações (conector, bot) e entregas de webhook.</p>
+  <table><thead><tr><th>Quando</th><th>Método</th><th>Rota</th><th>Status</th><th>ms</th></tr></thead><tbody id="tb-log"></tbody></table>
+  <h3 style="font-size:14px;margin-top:20px">Webhooks</h3>
+  <table><thead><tr><th>Quando</th><th>URL</th><th>Tipo</th><th>Tentativa</th><th>Status</th></tr></thead><tbody id="tb-wh"></tbody></table>
+</section>
+<section id="caos">
+  <p class="aviso">Injeta falhas nas rotas <code>/api/*</code> para provar que a integração aguenta: latência, 429 (com Retry-After) e 503.</p>
+  <div class="grid">
+    <div><label>Latência (ms)</label><input type="number" id="c-lat" min="0" step="50" value="0"></div>
+    <div><label>Taxa de 429</label><input type="number" id="c-429" min="0" max="1" step="0.05" value="0"></div>
+    <div><label>Taxa de 503</label><input type="number" id="c-500" min="0" max="1" step="0.05" value="0"></div>
+  </div>
+  <p><button class="b p" id="c-aplicar">Aplicar</button> <button class="b" id="c-zerar">Zerar falhas</button> <button class="b" id="resetar">Resetar dados do mock</button></p>
+</section>
+</main>
+<div id="toast"></div>
+<script>
+const $ = s => document.querySelector(s);
+const brl = v => (v ?? 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); setTimeout(()=>el.classList.remove('on'), 2600); }
+async function api(m, url, body){ const r = await fetch(url, {method:m, headers:{'Content-Type':'application/json'}, body: body?JSON.stringify(body):undefined}); const j = await r.json().catch(()=>({})); if(!r.ok){ toast((j.errors||[j.detail||r.status]).join(' ')); throw j; } return j; }
+
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button, section').forEach(e => e.classList.remove('on'));
+  b.classList.add('on'); $('#'+b.dataset.t).classList.add('on'); carregar();
+});
+
+async function carregarProdutos(){
+  const ps = await api('GET','/simulador/produtos');
+  $('#tb-prod').innerHTML = ps.map(p => {
+    const pai = p.grade && !p.paiId, filho = !!p.paiId;
+    const est = pai ? '<span class="mut">nas variações</span>' :
+      `<input type="number" value="${p.estoque}" data-est="${p.id}" step="1"> <span class="${p.estoque<0?'neg':''}">${p.estoque<0?'negativo':''}</span>`;
+    const preco = filho ? brl(p.preco) : `<input type="number" value="${p.preco}" data-preco="${p.id}" step="0.10">`;
+    const lv = filho ? '' : `<button class="b" data-lv="${p.id}" data-on="${p.enviarParaLojaVirtual}">${p.enviarParaLojaVirtual?'✓ enviar':'não enviar'}</button>`;
+    const nome = `${esc(p.nome)}${p.ativo?'':' <span class="wr">(inativo)</span>'}${pai?' <span class="badge">grade</span>':''}`;
+    return `<tr class="${pai?'pai':filho?'filho':''}"><td>${nome}</td><td><code>${p.codigo}</code> <span class="mut">${esc(p.codigoDeBarras)}</span></td><td>${preco}</td><td>${est}</td><td>${pai?'':p.reservado}</td><td>${lv}</td><td class="mut">${p.pontoProduto}</td></tr>`;
+  }).join('');
+  document.querySelectorAll('[data-preco]').forEach(i => i.onchange = async () => { await api('PATCH', `/simulador/produtos/${i.dataset.preco}`, {preco: +i.value}); toast('Preço alterado: novo ponto de sincronização'); carregar(); });
+  document.querySelectorAll('[data-est]').forEach(i => i.onchange = async () => { await api('POST', `/simulador/produtos/${i.dataset.est}/estoque`, {quantidade: +i.value}); toast('Estoque ajustado'); carregar(); });
+  document.querySelectorAll('[data-lv]').forEach(b => b.onclick = async () => { await api('POST', `/simulador/produtos/${b.dataset.lv}/loja-virtual?enviar=${b.dataset.on!=='true'}`); toast('Flag "enviar para a loja virtual" alterada'); carregar(); });
+}
+
+async function carregarPedidos(){
+  const ps = await api('GET','/simulador/pedidos');
+  $('#tb-ped').innerHTML = ps.length ? ps.map(p => {
+    const sit = p.cancelado ? '<span class="neg">cancelado (API)</span>' : p.canceladoNoGestao ? '<span class="wr">cancelado só no Gestão</span>' : p.faturado ? '<span class="ok">faturado</span>' : esc(p.situacao);
+    const doc = p.chaveNF ? `<a href="/arquivos/xml/${p.chaveNF}.xml" target="_blank"><code>${p.chaveNF.slice(0,12)}…</code></a>` : '—';
+    const acoes = (!p.faturado && !p.cancelado && !p.canceladoNoGestao) ? `<button class="b p" data-fat="${p.id}">Faturar</button> <button class="b" data-cg="${p.id}">Cancelar no Gestão</button>` : '';
+    return `<tr><td><code>${p.codigo}</code></td><td>${esc(p.numeroPedidoDeVenda)||'—'}</td><td>${esc(p.cliente)}</td><td>${brl(p.totalItens + (+p.frete||0))}</td><td>${sit}</td><td>${doc}</td><td>${acoes}</td></tr>`;
+  }).join('') : '<tr><td colspan="7" class="mut">Nenhum pedido recebido ainda.</td></tr>';
+  document.querySelectorAll('[data-fat]').forEach(b => b.onclick = async () => { await api('POST', `/simulador/pedidos/${b.dataset.fat}/faturar`); toast('NF-e emitida (homologação)'); carregar(); });
+  document.querySelectorAll('[data-cg]').forEach(b => b.onclick = async () => { await api('POST', `/simulador/pedidos/${b.dataset.cg}/cancelar-no-gestao`); toast('Cancelado no Gestão. A API NÃO verá esse cancelamento.'); carregar(); });
+}
+
+async function carregarLog(){
+  const l = await api('GET','/simulador/log');
+  const cor = s => s>=500?'neg':s>=400?'wr':'ok';
+  $('#tb-log').innerHTML = l.requisicoes.map(r => `<tr><td class="mut">${r.data}</td><td>${r.metodo}</td><td><code>${esc(r.caminho)}</code> <span class="mut">${esc(r.query)}</span></td><td class="${cor(r.status)}">${r.status}</td><td>${r.ms}</td></tr>`).join('') || '<tr><td colspan="5" class="mut">Sem chamadas ainda.</td></tr>';
+  $('#tb-wh').innerHTML = l.webhooks.map(w => `<tr><td class="mut">${w.data}</td><td>${esc(w.url)}</td><td>${w.tipo}</td><td>${w.tentativa}</td><td>${esc(w.status)}</td></tr>`).join('') || '<tr><td colspan="5" class="mut">Nenhum webhook configurado ou disparado.</td></tr>';
+}
+
+async function carregarInfo(){
+  const i = await api('GET','/simulador/info');
+  $('#info').textContent = `${i.conta.nomeFantasia} · ponto de sincronização ${i.pontoDeSincronizacao} · ${i.pedidos} pedido(s)`;
+  $('#c-lat').value = i.caos.latencia_ms; $('#c-429').value = i.caos.taxa_429; $('#c-500').value = i.caos.taxa_500;
+}
+
+async function carregar(){
+  await carregarInfo();
+  const aba = document.querySelector('nav button.on').dataset.t;
+  if (aba==='produtos') await carregarProdutos(); else if (aba==='pedidos') await carregarPedidos(); else if (aba==='log') await carregarLog();
+}
+$('#c-aplicar').onclick = async () => { await api('PUT','/simulador/caos',{latencia_ms:+$('#c-lat').value, taxa_429:+$('#c-429').value, taxa_500:+$('#c-500').value}); toast('Falhas aplicadas'); };
+$('#c-zerar').onclick = async () => { await api('PUT','/simulador/caos',{}); toast('Falhas desligadas'); carregar(); };
+$('#resetar').onclick = async () => { if(confirm('Voltar o mock aos dados iniciais?')){ await api('POST','/simulador/resetar'); toast('Mock resetado'); carregar(); } };
+carregar(); setInterval(() => { const a=document.querySelector('nav button.on').dataset.t; if(a!=='produtos' && a!=='caos') carregar(); }, 3000);
+</script>
+</body>
+</html>
