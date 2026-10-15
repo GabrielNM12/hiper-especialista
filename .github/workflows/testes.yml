@@ -1,0 +1,39 @@
+name: testes
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        projeto: [hiper-sdk, h1-mock-api-hiper, h2-conector-loja-virtual, h3-analisador-xml-fiscal, h4-bot-whatsapp]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Dependências
+        run: |
+          pip install -r h1-mock-api-hiper/requirements.txt
+          pip install -e hiper-sdk respx
+          if [ -f ${{ matrix.projeto }}/requirements.txt ]; then (cd ${{ matrix.projeto }} && pip install -r requirements.txt); fi
+      - name: Testes
+        working-directory: ${{ matrix.projeto }}
+        run: python -m pytest -q
+
+  contrato-oficial:
+    # Avisa (sem quebrar o build) se a Hiper mudar rotas ou campos no Swagger público
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install httpx
+      - run: python h1-mock-api-hiper/scripts/comparar_com_swagger_oficial.py

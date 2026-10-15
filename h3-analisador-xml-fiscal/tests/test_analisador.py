@@ -172,6 +172,8 @@ def test_cfops_na_perspectiva_da_loja(resultado):
 
 # ---------------------------------------------------------------- integração com H1
 def test_le_nfe_gerada_pelo_mock_do_hiper():
+    pytest.importorskip("fastapi", reason="instale h1-mock-api-hiper/requirements.txt para este teste")
+    pytest.importorskip("jwt")
     sys.path.insert(0, str(RAIZ / "h1-mock-api-hiper"))
     from mock_hiper.estado import Config, Estado
     from mock_hiper.nfe import gerar_nfe

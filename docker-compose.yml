@@ -1,0 +1,56 @@
+# Sobe o ecossistema completo para demonstração.  docker compose up --build
+services:
+  mock-hiper:
+    build: ./h1-mock-api-hiper
+    ports: ["8000:8000"]
+    environment:
+      MOCK_HIPER_URL_PUBLICA: http://localhost:8000
+
+  loja-woocommerce:
+    build:
+      context: .
+      dockerfile: h2-conector-loja-virtual/Dockerfile
+    command: ["python", "-m", "mock_woocommerce.app"]
+    environment:
+      PORT: "8100"
+    ports: ["8100:8100"]
+
+  conector:
+    build:
+      context: .
+      dockerfile: h2-conector-loja-virtual/Dockerfile
+    depends_on: [mock-hiper, loja-woocommerce]
+    ports: ["8200:8200"]
+    environment:
+      HIPER_URL: http://mock-hiper:8000
+      HIPER_CHAVE_DE_SEGURANCA: 4d6f636b48697065724c6f6a614d6f646153756c4372696369756d6132303236
+      WOO_URL: http://loja-woocommerce:8100
+      WOO_CONSUMER_KEY: ck_mock_0000000000000000000000000000000000
+      WOO_CONSUMER_SECRET: cs_mock_0000000000000000000000000000000000
+      MARKETPLACE_CNPJ: "12605982000124"
+      MARKETPLACE_NOME: Loja Virtual Moda Sul
+      CONECTOR_INTERVALO: "15"
+      USAR_VIACEP: "1"
+    volumes: ["conector:/dados"]
+
+  bot:
+    build:
+      context: .
+      dockerfile: h4-bot-whatsapp/Dockerfile
+    depends_on: [mock-hiper]
+    ports: ["8300:8300"]
+    environment:
+      HIPER_URL: http://mock-hiper:8000
+      HIPER_CHAVE_DE_SEGURANCA: 4d6f636b48697065724c6f6a614d6f646153756c4372696369756d6132303236
+      BOT_MODO: simulador
+      LOJA_NOME: Moda Sul
+      MARKETPLACE_CNPJ: "12605982000124"
+    volumes: ["bot:/dados"]
+
+  analisador:
+    build: ./h3-analisador-xml-fiscal
+    ports: ["8501:8501"]
+
+volumes:
+  conector:
+  bot:
