@@ -48,7 +48,9 @@ DESCRICAO = """
 Mock da **API personalizada (e-commerce) do Hiper Gestão**, fiel ao contrato publicado no Swagger oficial.
 
 1. Gere o token em `GET /api/v1/auth/gerar-token/{chaveDeSeguranca}` com a chave de exemplo do README.
-2. Use `Authorization: Bearer <token>` nas demais rotas.
+2. Use `Authorization: Bearer <token>` nas demais rotas. No Swagger: botão **Authorize** (canto superior direito),
+   cole **só o token** (sem a palavra `Bearer`) e **clique em Authorize dentro da janela** antes de fechar — fechar
+   sem clicar deixa as chamadas sem o cabeçalho e elas respondem 401.
 3. Use `/gestao` (ou as rotas `/simulador`) para agir como o lojista: mudar preço, estoque, faturar pedido.
 
 Códigos de evento, de situação e de webhook não são publicados pela Hiper; aqui são **simulados**.
@@ -92,7 +94,9 @@ def criar_app(config: Optional[Config] = None, *, despachar_webhooks: bool = Tru
         validacao_estrita=os.environ.get("MOCK_HIPER_VALIDACAO_ESTRITA", "1") == "1",
     )
     estado = Estado(config)
-    app = FastAPI(title="Mock API Hiper (e-commerce)", version="1.0.0", description=DESCRICAO)
+    app = FastAPI(title="Mock API Hiper (e-commerce)", version="1.0.0", description=DESCRICAO,
+                  # persistAuthorization: o token continua valendo se a página do Swagger for recarregada.
+                  swagger_ui_parameters={"persistAuthorization": True, "displayRequestDuration": True})
     app.state.estado = estado
     if despachar_webhooks:
         app.state.despachante = Despachante(estado)
