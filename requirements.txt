@@ -1,0 +1,16 @@
+# Tudo o que os 4 projetos precisam. Na raiz do repositório:  pip install -r requirements.txt
+-e ./hiper-sdk
+fastapi>=0.110
+uvicorn[standard]>=0.29
+httpx>=0.27
+pydantic>=2.6
+pyjwt>=2.8
+rapidfuzz>=3.6
+lxml>=5
+pandas>=2.1
+matplotlib>=3.8
+reportlab>=4
+streamlit>=1.35
+altair>=5
+pytest>=8
+respx>=0.21

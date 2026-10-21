@@ -18,6 +18,10 @@ from typing import Optional
 import jwt
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+# Gera o botão "Authorize" no Swagger: cole só o token (sem a palavra Bearer).
+BEARER = HTTPBearer(auto_error=False, description="Cole o token gerado em /api/v1/auth/gerar-token/{chaveDeSeguranca}")
 from pydantic import BaseModel
 
 from .estado import (
@@ -126,11 +130,11 @@ def criar_app(config: Optional[Config] = None, *, despachar_webhooks: bool = Tru
                             status_code=400)
 
     # -------------------------------------------------------------------- auth
-    def autenticar(authorization: Optional[str] = Header(default=None)) -> str:
-        if not authorization or not authorization.startswith("Bearer "):
+    def autenticar(credencial: Optional[HTTPAuthorizationCredentials] = Depends(BEARER)) -> str:
+        if credencial is None:
             raise HTTPException(status_code=401)
         try:
-            claims = jwt.decode(authorization[7:], SEGREDO_JWT, algorithms=["HS256"])
+            claims = jwt.decode(credencial.credentials, SEGREDO_JWT, algorithms=["HS256"])
         except jwt.PyJWTError:
             raise HTTPException(status_code=401)
         if claims.get(CLAIM_HASH) not in estado.chaves:

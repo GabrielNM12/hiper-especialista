@@ -5,7 +5,7 @@ from pathlib import Path
 
 from conftest import pedido_exemplo
 
-CONTRATO = json.loads((Path(__file__).resolve().parents[1] / "contrato" / "contrato_oficial.json").read_text())
+CONTRATO = json.loads((Path(__file__).resolve().parents[1] / "contrato" / "contrato_oficial.json").read_text(encoding="utf-8"))
 DTOS = CONTRATO["dtos"]
 
 

@@ -39,7 +39,7 @@ flowchart LR
     H2["H2 · Conector"]
     H4["H4 · Bot"]
     H3["H3 · Analisador fiscal"]
-    CONT["Painel do Contador<br/>(pasta de XMLs)"]
+    CONT["Contabilidade → Download de XML<br/>(XMLs do mês)"]
 
     H2 --> SDK
     H4 --> SDK
@@ -58,7 +58,7 @@ Requer Python 3.11+.
 ```bash
 git clone https://github.com/GabrielNM12/hiper-especialista && cd hiper-especialista
 python -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r h2-conector-loja-virtual/requirements.txt -r h3-analisador-xml-fiscal/requirements.txt -r h4-bot-whatsapp/requirements.txt
+pip install -r requirements.txt
 
 cd h2-conector-loja-virtual && python -m conector demo    # loja + conector + mock do Hiper
 ```
@@ -66,7 +66,7 @@ cd h2-conector-loja-virtual && python -m conector demo    # loja + conector + mo
 Cada pasta tem seu README com o roteiro de demonstração. Para rodar a suíte inteira:
 
 ```bash
-./scripts/testar_tudo.sh      # 91 testes
+python scripts/testar_tudo.py    # 93 testes (Windows, Mac e Linux)
 ```
 
 Com Docker: `docker compose up` sobe o mock do Hiper, a loja simulada, o conector, o bot e o dashboard fiscal

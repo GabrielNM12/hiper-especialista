@@ -9,6 +9,21 @@ def test_sem_token_401_sem_corpo(client):
     r = client.get("/api/v1/produtos/pontoDeSincronizacao")
     assert r.status_code == 401
     assert r.content == b""
+    r = client.get("/api/v1/produtos/pontoDeSincronizacao", headers={"Authorization": "Basic abc"})
+    assert r.status_code == 401
+
+
+def test_swagger_tem_botao_authorize(client):
+    spec = client.get("/openapi.json").json()
+    assert spec["components"]["securitySchemes"]["HTTPBearer"]["scheme"] == "bearer"
+
+
+def test_reset_nao_volta_o_ponto_de_sincronizacao(client, auth, estado):
+    antes = estado.ponto
+    client.post("/simulador/resetar")
+    assert estado.ponto > antes
+    lote = client.get(f"/api/v1/produtos/pontoDeSincronizacao?pontoDeSincronizacao={antes}", headers=auth).json()
+    assert lote["produtos"]  # integração já conectada recebe o catálogo de novo
 
 
 def test_chave_invalida(client):

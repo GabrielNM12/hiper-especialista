@@ -44,12 +44,13 @@ def painel(config: Config) -> None:
 
 
 def demo() -> None:
-    from mock_hiper.app import criar_app as criar_mock_hiper
+    from mock_hiper.compartilhado import garantir_mock, registrar_webhook
     from mock_hiper.seed import CHAVE_PADRAO
     from mock_woocommerce.app import CK, CS, criar_app as criar_mock_woo
 
-    mock_hiper = criar_mock_hiper()
-    _servir(mock_hiper, 8000)
+    novo = garantir_mock(8000)
+    if not novo:
+        print("Mock do Hiper já estava rodando na porta 8000: vou usar o mesmo.")
     _servir(criar_mock_woo(), 8100)
     time.sleep(1.5)
 
@@ -62,10 +63,7 @@ def demo() -> None:
     agendador = Agendador(sinc, config.intervalo_segundos)
 
     # O Hiper avisa o conector por webhook quando algo muda: o ciclo roda na hora, sem esperar o intervalo.
-    estado = mock_hiper.state.estado
-    estado.webhooks["demo"] = {"id": "demo", "contaHiperId": estado.conta["contaHiperId"], "ativo": True,
-                               "tipo": [1, 2, 3], "url": "http://localhost:8200/webhooks/hiper",
-                               "limiteDeTentativas": 3, "intervaloEmSegundosEntreTentativas": 2}
+    registrar_webhook("http://localhost:8000", CHAVE_PADRAO, "http://localhost:8200/webhooks/hiper")
     agendador.iniciar()
     print("""
 Demonstração no ar:

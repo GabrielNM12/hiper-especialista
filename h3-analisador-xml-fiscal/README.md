@@ -1,6 +1,6 @@
 # H3 · Analisador de XMLs fiscais do lojista
 
-Lê a pasta (ou o .zip) de XMLs de NF-e e NFC-e que o lojista exporta do **Painel do Contador do Hiper**
+Lê a pasta (ou o .zip) de XMLs de NF-e e NFC-e que o lojista baixa no Hiper Gestão em **Contabilidade → Download de XML**
 (ou de qualquer ERP) e devolve, em segundos, o que o contador e o dono da loja querem saber:
 
 - **Vendas**: receita líquida, ticket médio, vendas por dia e por hora, meios de pagamento;

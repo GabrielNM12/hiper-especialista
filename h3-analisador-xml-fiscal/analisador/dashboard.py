@@ -64,7 +64,7 @@ with st.sidebar:
     enviados = None
     if origem == "Enviar meus XMLs":
         enviados = st.file_uploader("XMLs de NF-e/NFC-e, eventos ou um .zip", type=["xml", "zip"], accept_multiple_files=True)
-        st.caption("Exporte a pasta de XMLs do Painel do Contador do Hiper (ou de qualquer ERP) e envie aqui.")
+        st.caption("No Hiper Gestão: Contabilidade → Download de XML (mês e filial). Envie o .zip aqui; serve XML de qualquer ERP.")
 
 if origem == "Enviar meus XMLs":
     if not enviados:

@@ -60,7 +60,10 @@ def main() -> None:
         print(f"{n} XML(s) salvos em {args.destino}")
     elif args.cmd == "dashboard":
         app = Path(__file__).with_name("dashboard.py")
-        subprocess.run([sys.executable, "-m", "streamlit", "run", str(app)], check=False)
+        print("Dashboard em http://localhost:8501  (Ctrl+C para sair)")
+        # headless evita a pergunta de e-mail que o Streamlit faz na primeira execução
+        subprocess.run([sys.executable, "-m", "streamlit", "run", str(app), "--server.headless=true",
+                        "--browser.gatherUsageStats=false", "--server.port=8501"], check=False)
 
 
 if __name__ == "__main__":

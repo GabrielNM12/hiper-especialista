@@ -101,7 +101,9 @@ class Estado:
         with self._lock:
             self.conta = dict(seed.CONTA_PADRAO)
             self.chaves = {seed.CHAVE_PADRAO: self.conta["contaHiperId"]}
-            self.ponto = 0
+            # Como no Hiper real, o ponto de sincronização nunca volta: após um reset, integrações
+            # já conectadas recebem o catálogo inteiro de novo em vez de ficarem "à frente" do mock.
+            self.ponto = getattr(self, "ponto", 0)
             self.produtos: dict[str, dict] = {}
             self.ja_enviados: set[str] = set()
             self.pedidos: dict[str, Pedido] = {}

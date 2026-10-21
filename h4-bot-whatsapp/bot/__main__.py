@@ -24,11 +24,10 @@ from .config import Config  # noqa: E402
 
 
 def demo() -> None:
-    from mock_hiper.app import criar_app as criar_mock
+    from mock_hiper.compartilhado import garantir_mock
     from mock_hiper.seed import CHAVE_PADRAO
-    servidor = uvicorn.Server(uvicorn.Config(criar_mock(), host="0.0.0.0", port=8000, log_level="warning"))
-    threading.Thread(target=servidor.run, daemon=True).start()
-    time.sleep(1.5)
+    if not garantir_mock(8000):
+        print("Mock do Hiper já estava rodando na porta 8000: vou usar o mesmo.")
     banco = Path("demo-bot.db")
     banco.unlink(missing_ok=True)
     config = Config(hiper_url="http://localhost:8000", hiper_chave=CHAVE_PADRAO, marketplace_cnpj="12605982000124",
